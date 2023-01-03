@@ -1,0 +1,79 @@
+package ${package.Controller};
+
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import java.util.List;
+
+import $!{package.Service}.$!{table.serviceName};
+import ${package.Entity}.${entity};
+
+#if(${superControllerClassPackage})
+import ${superControllerClassPackage};
+#end
+
+/**
+ * <p>
+ * $!{table.comment} 前端控制器
+ * </p>
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+#if(${restControllerStyle})
+@RestController
+#else
+@Controller
+#end
+@RequestMapping("#if(${package.ModuleName})/${package.ModuleName}#end/#if(${controllerMappingHyphenStyle})${controllerMappingHyphen}#else${table.entityPath}#end")
+@CrossOrigin
+#if(${kotlin})
+class ${table.controllerName}#if(${superControllerClass}) : ${superControllerClass}()#end
+
+#else
+#if(${superControllerClass})
+public class ${table.controllerName} extends ${superControllerClass} {
+#else
+public class ${table.controllerName} {
+#end
+
+        @Resource
+        private ${table.serviceName} ${table.entityPath}Service;
+
+
+        @PostMapping
+        public Result saveOrUpdate(@RequestBody ${entity} ${table.entityPath}){
+            boolean isSave = ${table.entityPath}Service.saveOrUpdate(${table.entityPath});
+            return isSave?Result.ok():Result.fail();
+        }
+
+        @DeleteMapping("/{id}")
+        public Result delete${entity}ById(@PathVariable Integer id){
+            boolean isDel = ${table.entityPath}Service.removeById(id);
+            return isDel?Result.ok():Result.fail();
+        }
+
+        @DeleteMapping
+        public Result batchDelete${entity}(@RequestBody List<Integer> ids){
+            return Result.ok(${table.entityPath}Service.removeByIds(ids));
+        }
+        @GetMapping
+        public Result getAll(){
+            List<${entity}> ${table.entityPath}List = ${table.entityPath}Service.list();
+            return !${table.entityPath}List.isEmpty()?Result.ok(${table.entityPath}List):Result.fail();
+        }
+
+        @GetMapping("/{id}")
+        public Result get${entity}ById(@PathVariable Integer id){
+            ${entity} ${table.entityPath} = ${table.entityPath}Service.getById(id);
+            return ${table.entityPath}!=null?Result.ok(${table.entityPath}):Result.fail();
+        }
+
+        @GetMapping("/page")
+        public Result findPage(@RequestParam Integer pageNum,@RequestParam Integer pageSize){
+             return Result.ok(${table.entityPath}Service.page(new Page<>(pageNum,pageSize)));
+        }
+}
+
+#end
